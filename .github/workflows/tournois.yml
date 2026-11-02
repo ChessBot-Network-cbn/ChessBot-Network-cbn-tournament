@@ -27,5 +27,9 @@ jobs:
 
       - name: Creer CBN Arena
         env:
+
+      - name: Creer CBN Arena
+        env:
           LICHESS_TOKEN: ${{ secrets.LICHESS_TOKEN }}
-        run: python creer_tournois.py
+        run: python main.py
+
