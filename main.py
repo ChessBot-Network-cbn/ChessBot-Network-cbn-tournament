@@ -1,7 +1,7 @@
-
 import os
 import requests
 import time
+from datetime import datetime
 
 TOKEN = os.environ["LICHESS_TOKEN"]
 API_URL = "https://lichess.org/api/tournament"
@@ -10,31 +10,42 @@ headers = {
     "Authorization": f"Bearer {TOKEN}",
 }
 
-# Paramètres communs aux 12 tournois
 NB_TOURNOIS = 12
+INTERVALLE = 60 * 60  # 1 heure en secondes
 
 data_base = {
     "name": "CBN Arena",
     "clockTime": 3,
     "clockIncrement": 2,
     "minutes": 60,
-
-    # Réserver aux membres de l'équipe CBN
     "conditions.teamMember.teamId": "chessbot-network-cbn",
-
-    # Autoriser les bots, si Lichess accepte ce paramètre
     "conditions.bots": "true",
 }
 
-tournois_crees = []
+for i in range(NB_TOURNOIS):
+    numero = i + 1
 
-for i in range(1, NB_TOURNOIS + 1):
+    # Attendre une heure avant chaque tournoi, sauf le premier
+    if i > 0:
+        prochain_lancement = debut + i * INTERVALLE
+        attente = prochain_lancement - time.time()
+
+        if attente > 0:
+            print(
+                f"Tournoi {numero} dans "
+                f"{attente / 60:.0f} minutes."
+            )
+            time.sleep(attente)
+
+    debut = time.time() if i == 0 else debut
+
     data = data_base.copy()
+    data["name"] = f"CBN Arena #{numero:02d}"
 
-    # Un nom différent pour chaque tournoi
-    data["name"] = f"CBN Arena"
-
-    print(f"\nCréation du tournoi {i}/{NB_TOURNOIS}...")
+    print(
+        f"\n[{datetime.now().strftime('%H:%M:%S')}] "
+        f"Création du tournoi {numero}/{NB_TOURNOIS}"
+    )
 
     try:
         response = requests.post(
@@ -46,28 +57,16 @@ for i in range(1, NB_TOURNOIS + 1):
 
         if response.ok:
             tournoi = response.json()
-            tournoi_id = tournoi["id"]
-            lien = f"https://lichess.org/tournament/{tournoi_id}"
-
-            tournois_crees.append(lien)
-
-            print(f"✅ {data['name']} créé !")
-            print("Lien :", lien)
-            print("Durée :", tournoi.get("minutes"), "minutes")
+            print("✅ Tournoi créé :", data["name"])
+            print(
+                "Lien :",
+                f"https://lichess.org/tournament/{tournoi['id']}"
+            )
         else:
-            print(f"❌ Échec du tournoi {i}")
-            print("Erreur HTTP :", response.status_code)
+            print("❌ Erreur :", response.status_code)
             print(response.text)
 
     except requests.RequestException as e:
-        print(f"❌ Erreur réseau pour le tournoi {i} :", e)
+        print("❌ Erreur réseau :", e)
 
-    # Petite pause entre les requêtes
-    if i < NB_TOURNOIS:
-        time.sleep(2)
-
-print("\n========== RÉSULTAT ==========")
-print(f"Tournois créés : {len(tournois_crees)}/{NB_TOURNOIS}")
-
-for lien in tournois_crees:
-    print(lien)
+print("\n🏁 Planning des 12 tournois terminé.")
