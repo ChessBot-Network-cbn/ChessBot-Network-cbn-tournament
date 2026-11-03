@@ -40,7 +40,7 @@ for i in range(NB_TOURNOIS):
     debut = time.time() if i == 0 else debut
 
     data = data_base.copy()
-    data["name"] = f"CBN Arena #{numero:02d}"
+    data["name"] = f"CBN Arena"
 
     print(
         f"\n[{datetime.now().strftime('%H:%M:%S')}] "
