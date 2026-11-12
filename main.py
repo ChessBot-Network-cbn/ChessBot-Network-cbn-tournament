@@ -19,7 +19,7 @@ INTERVALLE = 60 * 60 * 1000  # 1 heure en millisecondes
 premier_depart = int(time.time() * 1000) + 2 * 60 * 1000
 
 data_base = {
-    "name": "CBN Arena",
+    "name": "CBN",
     "clockTime": 3,
     "clockIncrement": 2,
     "minutes": 60,
